@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import { useRef, useState } from 'react';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
@@ -11,17 +12,47 @@ export default function UpdateProfileInformation({
     className = '',
 }) {
     const user = usePage().props.auth.user;
+    const photoInput = useRef();
+    const [photoPreview, setPhotoPreview] = useState(null);
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } =
+    const { data, setData, post, errors, processing, recentlySuccessful } =
         useForm({
+            _method: 'patch',
             name: user.name,
             email: user.email,
+            photo: null,
         });
 
     const submit = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'));
+        post(route('profile.update'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setPhotoPreview(null);
+                photoInput.current.value = null;
+            },
+        });
+    };
+
+    const updatePhotoPreview = () => {
+        const photo = photoInput.current.files[0];
+
+        if (!photo) return;
+
+        setData('photo', photo);
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            setPhotoPreview(e.target.result);
+        };
+
+        reader.readAsDataURL(photo);
+    };
+
+    const selectNewPhoto = () => {
+        photoInput.current.click();
     };
 
     return (
@@ -37,6 +68,44 @@ export default function UpdateProfileInformation({
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
+                {/* Profile Photo */}
+                <div>
+                    <InputLabel htmlFor="photo" value="Photo" />
+
+                    <input
+                        type="file"
+                        id="photo"
+                        className="hidden"
+                        ref={photoInput}
+                        onChange={updatePhotoPreview}
+                    />
+
+                    <div className="mt-2">
+                        {photoPreview ? (
+                            <span
+                                className="block h-20 w-20 rounded-full bg-cover bg-no-repeat bg-center"
+                                style={{ backgroundImage: `url('${photoPreview}')` }}
+                            ></span>
+                        ) : (
+                            <img
+                                src={user.profile_photo_url}
+                                alt={user.name}
+                                className="h-20 w-20 rounded-full object-cover"
+                            />
+                        )}
+                    </div>
+
+                    <PrimaryButton
+                        className="mt-2 me-2"
+                        type="button"
+                        onClick={selectNewPhoto}
+                    >
+                        Select A New Photo
+                    </PrimaryButton>
+
+                    <InputError className="mt-2" message={errors.photo} />
+                </div>
+
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
 

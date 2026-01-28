@@ -54,6 +54,11 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
                                             >
+                                                <img
+                                                    src={user.profile_photo_url}
+                                                    alt={user.name}
+                                                    className="me-2 h-8 w-8 rounded-full object-cover"
+                                                />
                                                 {user.name}
 
                                                 <svg
@@ -161,12 +166,22 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800 dark:text-gray-200">
-                                {user.name}
+                        <div className="flex items-center px-4">
+                            <div className="shrink-0">
+                                <img
+                                    className="h-10 w-10 rounded-full object-cover"
+                                    src={user.profile_photo_url}
+                                    alt={user.name}
+                                />
                             </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
+
+                            <div className="ms-3">
+                                <div className="text-base font-medium text-gray-800 dark:text-gray-200">
+                                    {user.name}
+                                </div>
+                                <div className="text-sm font-medium text-gray-500">
+                                    {user.email}
+                                </div>
                             </div>
                         </div>
 
