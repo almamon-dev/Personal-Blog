@@ -2,14 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
 import Footer from '@/Components/Landing/Footer';
-import { Share2, Clock, Calendar, ChevronLeft, ChevronDown, ThumbsUp, MessageSquare, Send, Globe, Bookmark, MoreHorizontal, Copy, Check, Zap, BookOpen, ArrowRight, Repeat2, UserPlus } from 'lucide-react';
+import Modal from '@/Components/Modal';
+import { Clock, Calendar, ChevronLeft, ChevronDown, ThumbsUp, MessageSquare, Globe, Bookmark, MoreHorizontal, Copy, Check, Zap, BookOpen, ArrowRight, UserPlus, Lock } from 'lucide-react';
 import 'github-markdown-css/github-markdown-light.css';
 
 export default function Show({ blog, relatedBlogs, auth }) {
     const [scrolled, setScrolled] = useState(0);
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const { data, setData, post, processing, reset, errors } = useForm({
         body: '',
     });
+
+    useEffect(() => {
+        if (!auth.user) {
+            const timer = setTimeout(() => {
+                setShowLoginModal(true);
+            }, 10000); // 10 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [auth.user]);
 
     const submitComment = (e) => {
         e.preventDefault();
@@ -181,7 +192,6 @@ export default function Show({ blog, relatedBlogs, auth }) {
                                         </div>
                                         <div className="flex items-center space-x-2">
                                             <button className="p-2 text-[rgba(0,0,0,0.6)] hover:bg-[#F3F3F3] rounded-full transition-all"><Bookmark className="w-5 h-5" /></button>
-                                            <button className="p-2 text-[rgba(0,0,0,0.6)] hover:bg-[#F3F3F3] rounded-full transition-all"><Share2 className="w-5 h-5" /></button>
                                         </div>
                                     </div>
 
@@ -237,16 +247,6 @@ export default function Show({ blog, relatedBlogs, auth }) {
                                         <button onClick={scrollToComments} className="flex items-center space-x-2 py-3 hover:text-[#0a66c2] transition-all group">
                                             <MessageSquare className="w-5 h-5" />
                                             <span>Comment</span>
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center space-x-6">
-                                        <button className="flex items-center space-x-2 py-3 hover:text-[#0a66c2] transition-all group">
-                                            <Repeat2 className="w-5 h-5" />
-                                            <span>Repost</span>
-                                        </button>
-                                        <button className="flex items-center space-x-2 py-3 hover:text-[#0a66c2] transition-all group">
-                                            <Send className="w-5 h-5" />
-                                            <span>Send</span>
                                         </button>
                                     </div>
                                 </div>
@@ -366,6 +366,48 @@ export default function Show({ blog, relatedBlogs, auth }) {
             </main>
 
             <Footer />
+
+            {/* Restricted Content Modal */}
+            <Modal show={showLoginModal} closeable={false} maxWidth="md">
+                <div className="p-8 text-center bg-white dark:bg-gray-800">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
+                        <Lock className="h-8 w-8 text-[#0a66c2]" />
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                        Member Only Access
+                    </h3>
+                    
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                        To continue reading this technical guide and join the professional discussion, please sign in to your account.
+                    </p>
+                    
+                    <div className="space-y-3">
+                        <Link
+                            href={route('login')}
+                            className="w-full flex items-center justify-center bg-[#0a66c2] text-white py-3 rounded-full font-bold text-sm hover:bg-[#004182] transition-all shadow-md shadow-blue-100"
+                        >
+                            Log In to Continue
+                        </Link>
+                        
+                        <Link
+                            href={route('register')}
+                            className="w-full flex items-center justify-center border-2 border-[#0a66c2] text-[#0a66c2] py-3 rounded-full font-bold text-sm hover:bg-blue-50 transition-all"
+                        >
+                            Create Free Account
+                        </Link>
+                    </div>
+                    
+                    <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                        <Link 
+                            href={route('welcome')}
+                            className="text-xs font-semibold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors"
+                        >
+                            Back to Home
+                        </Link>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

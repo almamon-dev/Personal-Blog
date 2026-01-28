@@ -2,7 +2,153 @@ import React from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import Navbar from '@/Components/Landing/Navbar';
 import Footer from '@/Components/Landing/Footer';
-import { Bookmark, Share2, MoreHorizontal, ThumbsUp, MessageSquare, ExternalLink, Globe, Layout, Code, Zap, Clock, Calendar, Send, BookOpen, GraduationCap, ChevronDown, ArrowRight, Repeat2 } from 'lucide-react';
+import { Bookmark, MoreHorizontal, ThumbsUp, MessageSquare, ExternalLink, Globe, Layout, Code, Zap, Clock, Calendar, BookOpen, GraduationCap, ChevronDown, ArrowRight } from 'lucide-react';
+import { useForm } from '@inertiajs/react';
+
+const BlogItem = ({ blog, auth }) => {
+    const [showCommentForm, setShowCommentForm] = React.useState(false);
+    const { data, setData, post, processing, reset, errors } = useForm({
+        body: '',
+    });
+
+    const submitComment = (e) => {
+        e.preventDefault();
+        post(route('blogs.comments.store', blog.slug), {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset('body');
+                setShowCommentForm(false);
+            },
+        });
+    };
+
+    return (
+        <article className="bg-white rounded-lg border border-[#e0e0e0] shadow-sm overflow-hidden flex flex-col hover:border-[#d0d0d0] transition-all group">
+            {/* Post Header */}
+            <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                    <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                        <img src="https://avatars.githubusercontent.com/u/12028608?v=4" alt="Savanihd" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="min-w-0">
+                        <div className="flex items-center space-x-1.5">
+                            <span className="text-[15px] font-semibold text-[rgba(0,0,0,0.9)] hover:text-[#0a66c2] hover:underline cursor-pointer truncate">Savanihd Skills</span>
+                            <span className="text-[13px] text-[rgba(0,0,0,0.6)] font-normal whitespace-nowrap">• 1st</span>
+                        </div>
+                        <p className="text-[12px] text-[rgba(0,0,0,0.6)] font-normal truncate leading-none mt-0.5">Software Architect & Mentor</p>
+                        <div className="flex items-center space-x-1.5 mt-1.5">
+                            <span className="text-[12px] text-[rgba(0,0,0,0.6)] font-normal">{new Date(blog.created_at).toLocaleDateString()}</span>
+                            <span className="text-[rgba(0,0,0,0.4)]">•</span>
+                            <Globe className="w-3.5 h-3.5 text-[rgba(0,0,0,0.6)]" />
+                        </div>
+                    </div>
+                </div>
+                <button className="text-[rgba(0,0,0,0.6)] hover:bg-[#F3F3F3] p-2.5 rounded-full transition-colors flex-shrink-0">
+                    <MoreHorizontal className="w-6 h-6" />
+                </button>
+            </div>
+
+            {/* Brief Content */}
+            <div className="px-4 pb-4">
+                <p className="text-[14px] text-[rgba(0,0,0,0.9)] leading-normal font-normal line-clamp-3">
+                    {blog.content?.replace(/<[^>]*>/g, '').substring(0, 240)}...
+                </p>
+            </div>
+
+            {/* Card Style Content */}
+            <Link href={route('blogs.show', blog.slug)} className="block border-y border-[#F0F0F0] overflow-hidden group">
+                <div className="relative aspect-[1.91/1] overflow-hidden bg-[#F3F2EF]">
+                    <img 
+                        src={blog.image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800'} 
+                        alt={blog.title}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
+                    />
+                </div>
+                <div className="p-5 bg-white group-hover:bg-[rgba(0,0,0,0.02)] transition-colors border-t border-[#F0F0F0]">
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[11px] text-[#0a66c2] font-semibold uppercase tracking-wider">savanihd.com</span>
+                        <span className="text-[#F0F0F0] font-black">•</span>
+                        <span className="text-[11px] text-[rgba(0,0,0,0.6)] font-semibold uppercase tracking-wider">{blog.category?.name}</span>
+                    </div>
+                    <h2 className="text-[18px] font-semibold text-[rgba(0,0,0,0.9)] leading-tight group-hover:underline tracking-tight">
+                        {blog.title}
+                    </h2>
+                </div>
+            </Link>
+
+            {/* Stats */}
+            <div className="px-4 py-2.5 flex items-center text-[12px] text-[rgba(0,0,0,0.6)] font-normal">
+                <div className="flex items-center space-x-1.5">
+                    <div className="flex -space-x-1">
+                        <div className="w-4.5 h-4.5 rounded-full bg-[#378FE9] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                            <ThumbsUp className="w-2.5 h-2.5 text-white fill-current" />
+                        </div>
+                        <div className="w-4.5 h-4.5 rounded-full bg-[#DF704D] flex items-center justify-center border-2 border-white shadow-sm">
+                            <span className="text-[7.5px] text-white">❤️</span>
+                        </div>
+                    </div>
+                    <span className="hover:text-[#0a66c2] hover:underline cursor-pointer">1.2k • 85 comments</span>
+                </div>
+            </div>
+
+            {/* Action Bar */}
+            <div className="px-2 py-1 flex items-center border-t border-[#F0F0F0]">
+                <button className="flex-1 flex items-center justify-center space-x-1.5 p-3 text-[rgba(0,0,0,0.6)] font-semibold hover:bg-[#F3F3F3] rounded-md transition-all text-sm group">
+                    <ThumbsUp className="w-5 h-5 group-hover:text-[#0a66c2]" />
+                    <span className="group-hover:text-[#0a66c2]">Like</span>
+                </button>
+                <button 
+                    onClick={() => setShowCommentForm(!showCommentForm)}
+                    className="flex-1 flex items-center justify-center space-x-1.5 p-3 text-[rgba(0,0,0,0.6)] font-semibold hover:bg-[#F3F3F3] rounded-md transition-all text-sm group"
+                >
+                    <MessageSquare className="w-5 h-5 group-hover:text-[#0a66c2]" />
+                    <span className="group-hover:text-[#0a66c2]">Comment</span>
+                </button>
+            </div>
+
+            {/* Comment Form */}
+            {showCommentForm && (
+                <div className="px-4 py-3 border-t border-[#F0F0F0] animate-in slide-in-from-top-2 duration-200">
+                    {auth.user ? (
+                        <form onSubmit={submitComment} className="flex gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                                <img src={auth.user.profile_photo_url || `https://ui-avatars.com/api/?name=${auth.user.name}&background=random`} alt={auth.user.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1">
+                                <div className="relative">
+                                    <textarea 
+                                        value={data.body}
+                                        onChange={(e) => setData('body', e.target.value)}
+                                        placeholder="Add a comment..."
+                                        className="w-full border border-gray-300 rounded-2xl px-4 py-2 text-sm focus:ring-1 focus:ring-[#0a66c2] focus:border-[#0a66c2] transition-all resize-none min-h-[40px] leading-tight"
+                                        rows="1"
+                                    ></textarea>
+                                </div>
+                                {data.body.trim() && (
+                                    <div className="flex justify-start mt-2">
+                                        <button 
+                                            type="submit" 
+                                            disabled={processing}
+                                            className="bg-[#0a66c2] text-white px-4 py-1.5 rounded-full font-bold text-xs hover:bg-[#004182] transition-all disabled:opacity-50"
+                                        >
+                                            Post
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="text-center py-2">
+                            <p className="text-xs text-gray-500">
+                                <Link href={route('login')} className="text-[#0a66c2] font-bold hover:underline">Log in</Link> to join the conversation.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </article>
+    );
+};
 
 export default function Index({ blogs, currentCategory, otherTutorials, auth, currentSort }) {
     const [isSortOpen, setIsSortOpen] = React.useState(false);
@@ -91,92 +237,7 @@ export default function Index({ blogs, currentCategory, otherTutorials, auth, cu
 
                             {blogs.length > 0 ? (
                                 blogs.map((blog) => (
-                                    <article key={blog.id} className="bg-white rounded-lg border border-[#e0e0e0] shadow-sm overflow-hidden flex flex-col hover:border-[#d0d0d0] transition-all group">
-                                        {/* Post Header */}
-                                        <div className="p-4 flex items-center justify-between">
-                                            <div className="flex items-center space-x-2.5">
-                                                <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
-                                                    <img src="https://avatars.githubusercontent.com/u/12028608?v=4" alt="Savanihd" className="w-full h-full object-cover" />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <div className="flex items-center space-x-1.5">
-                                                        <span className="text-[15px] font-semibold text-[rgba(0,0,0,0.9)] hover:text-[#0a66c2] hover:underline cursor-pointer truncate">Savanihd Skills</span>
-                                                        <span className="text-[13px] text-[rgba(0,0,0,0.6)] font-normal whitespace-nowrap">• 1st</span>
-                                                    </div>
-                                                    <p className="text-[12px] text-[rgba(0,0,0,0.6)] font-normal truncate leading-none mt-0.5">Software Architect & Mentor</p>
-                                                    <div className="flex items-center space-x-1.5 mt-1.5">
-                                                        <span className="text-[12px] text-[rgba(0,0,0,0.6)] font-normal">{new Date(blog.created_at).toLocaleDateString()}</span>
-                                                        <span className="text-[rgba(0,0,0,0.4)]">•</span>
-                                                        <Globe className="w-3.5 h-3.5 text-[rgba(0,0,0,0.6)]" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button className="text-[rgba(0,0,0,0.6)] hover:bg-[#F3F3F3] p-2.5 rounded-full transition-colors flex-shrink-0">
-                                                <MoreHorizontal className="w-6 h-6" />
-                                            </button>
-                                        </div>
-
-                                        {/* Brief Content */}
-                                        <div className="px-4 pb-4">
-                                            <p className="text-[14px] text-[rgba(0,0,0,0.9)] leading-normal font-normal line-clamp-3">
-                                                {blog.content?.replace(/<[^>]*>/g, '').substring(0, 240)}...
-                                            </p>
-                                        </div>
-
-                                        {/* Card Style Content */}
-                                        <Link href={route('blogs.show', blog.slug)} className="block border-y border-[#F0F0F0] overflow-hidden group">
-                                            <div className="relative aspect-[1.91/1] overflow-hidden bg-[#F3F2EF]">
-                                                <img 
-                                                    src={blog.image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800'} 
-                                                    alt={blog.title}
-                                                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
-                                                />
-                                            </div>
-                                            <div className="p-5 bg-white group-hover:bg-[rgba(0,0,0,0.02)] transition-colors border-t border-[#F0F0F0]">
-                                                <div className="flex items-center gap-2 mb-1.5">
-                                                    <span className="text-[11px] text-[#0a66c2] font-semibold uppercase tracking-wider">savanihd.com</span>
-                                                    <span className="text-[#F0F0F0] font-black">•</span>
-                                                    <span className="text-[11px] text-[rgba(0,0,0,0.6)] font-semibold uppercase tracking-wider">{blog.category?.name}</span>
-                                                </div>
-                                                <h2 className="text-[18px] font-semibold text-[rgba(0,0,0,0.9)] leading-tight group-hover:underline tracking-tight">
-                                                    {blog.title}
-                                                </h2>
-                                            </div>
-                                        </Link>
-
-                                        {/* Stats */}
-                                        <div className="px-4 py-2.5 flex items-center justify-between text-[12px] text-[rgba(0,0,0,0.6)] font-normal">
-                                            <div className="flex items-center space-x-1.5">
-                                                <div className="flex -space-x-1">
-                                                    <div className="w-4.5 h-4.5 rounded-full bg-[#378FE9] flex items-center justify-center border-2 border-white shadow-sm z-10">
-                                                        <ThumbsUp className="w-2.5 h-2.5 text-white fill-current" />
-                                                    </div>
-                                                    <div className="w-4.5 h-4.5 rounded-full bg-[#DF704D] flex items-center justify-center border-2 border-white shadow-sm">
-                                                        <span className="text-[7.5px] text-white">❤️</span>
-                                                    </div>
-                                                </div>
-                                                <span className="hover:text-[#0a66c2] hover:underline cursor-pointer">1.2k • 85 comments</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="hover:text-[#0a66c2] hover:underline cursor-pointer">12 reposts</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Action Bar */}
-                                        <div className="px-2 py-1 flex items-center border-t border-[#F0F0F0]">
-                                            {[
-                                                { icon: ThumbsUp, label: 'Like' },
-                                                { icon: MessageSquare, label: 'Comment' },
-                                                { icon: Share2, label: 'Repost' },
-                                                { icon: Send, label: 'Send' }
-                                            ].map((action, i) => (
-                                                <button key={i} className="flex-1 flex items-center justify-center space-x-1.5 p-3 text-[rgba(0,0,0,0.6)] font-semibold hover:bg-[#F3F3F3] rounded-md transition-all text-sm group">
-                                                    <action.icon className="w-5 h-5 group-hover:text-[#0a66c2]" />
-                                                    <span className="group-hover:text-[#0a66c2]">{action.label}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </article>
+                                    <BlogItem key={blog.id} blog={blog} auth={auth} />
                                 ))
                             ) : (
                                 <div className="bg-white rounded-lg p-20 text-center border border-[#e0e0e0]">
