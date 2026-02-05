@@ -1,177 +1,317 @@
-import React from 'react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, Link } from '@inertiajs/react';
-import { ArrowLeft, Save, Image as ImageIcon, Video, X } from 'lucide-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { useRef } from "react";
+import AdminLayout from "@/Layouts/AdminLayout";
+import { Head, useForm, Link } from "@inertiajs/react";
+import {
+    Home,
+    ChevronLeft,
+    Save,
+    Image as ImageIcon,
+    Video,
+    LayoutGrid,
+    Type,
+    CloudUpload,
+    Feather,
+} from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-export default function Create({ auth, categories }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        title: '',
-        content: '',
-        category_id: '',
+export default function Create({ categories }) {
+    const { data, setData, post, processing, errors } = useForm({
+        title: "",
+        content: "",
+        category_id: "",
         image: null,
-        video_url: '',
+        video_url: "",
     });
 
-    const submit = (e) => {
+    const fileInputRef = useRef(null);
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('admin.blogs.store'));
+        post(route("admin.blogs.store"));
     };
 
     return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Create Blog Post</h2>}
-        >
-            <Head title="Admin - Create Blog" />
+        <AdminLayout>
+            <Head title="Create New Blog" />
 
-            <div className="py-12 bg-[#F3F2EF] min-h-screen">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
-                    
-                    <div className="mb-6 flex items-center justify-between">
-                        <Link 
-                            href={route('admin.blogs.index')}
-                            className="flex items-center text-sm font-bold text-gray-500 hover:text-[#0a66c2] transition-colors"
-                        >
-                            <ArrowLeft className="w-4 h-4 mr-1" />
-                            Back to Blog Management
-                        </Link>
+            <div className="space-y-4 max-w-full mx-auto pb-10 px-4 md:px-8">
+                {/* Header & Breadcrumb */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-[22px] font-bold text-[#2f3344] tracking-tight">
+                            Blogs
+                        </h1>
+                        <div className="flex items-center gap-2 text-[13px] text-[#727586] mt-1">
+                            <Home size={14} />
+                            <span className="text-[#c3c4ca]">-</span>
+                            <span>Content</span>
+                            <span className="text-[#c3c4ca]">-</span>
+                            <span className="font-medium text-[#2f3344]">
+                                Create Blog
+                            </span>
+                        </div>
                     </div>
+                    <Link
+                        href={route("admin.blogs.index")}
+                        className="flex items-center gap-2 text-[#673ab7] hover:underline font-bold text-[14px]"
+                    >
+                        <ChevronLeft size={18} />
+                        Back to list
+                    </Link>
+                </div>
 
-                    <form onSubmit={submit} className="space-y-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Main Content */}
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">
-                                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest border-l-4 border-[#0a66c2] pl-3 mb-4">Post Content</h3>
-                                    
-                                    <div>
-                                        <label className="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1.5 px-1">Post Title</label>
-                                        <input 
-                                            type="text"
-                                            value={data.title}
-                                            onChange={(e) => setData('title', e.target.value)}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-bold text-gray-900 focus:ring-0 focus:border-[#0a66c2] transition-colors"
-                                            placeholder="Enter blog title (English or Bangla)"
-                                            required
-                                        />
-                                        {errors.title && <p className="text-xs text-red-500 mt-1 font-bold">{errors.title}</p>}
-                                    </div>
-
-                                    <div className="bg-white ql-container-box">
-                                        <label className="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1.5 px-1">Blog Body Content</label>
-                                        <ReactQuill 
-                                            theme="snow"
-                                            value={data.content}
-                                            onChange={(content) => setData('content', content)}
-                                            className="h-96 mb-12"
-                                            modules={{
-                                                toolbar: [
-                                                    [{ 'header': [1, 2, 3, 4, false] }],
-                                                    ['bold', 'italic', 'underline', 'strike'],
-                                                    [{'list': 'ordered'}, {'list': 'bullet'}],
-                                                    ['link', 'image', 'video'],
-                                                    ['code-block'],
-                                                    ['clean']
-                                                ],
-                                            }}
-                                        />
-                                        {errors.content && <p className="text-xs text-red-500 mt-1 font-bold">{errors.content}</p>}
-                                    </div>
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+                >
+                    {/* Left Column: Content Editor (Main) */}
+                    <div className="lg:col-span-8 space-y-6">
+                        <div className="bg-white rounded-[12px] border border-[#e3e4e8] shadow-sm overflow-hidden animate-in fade-in slide-in-from-left duration-500">
+                            <div className="px-6 py-4 border-b border-[#e3e4e8] bg-slate-50/50 flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-[#f0f7ff] flex items-center justify-center text-[#2c8af8]">
+                                    <Feather size={16} />
                                 </div>
+                                <h2 className="text-[16px] font-bold text-[#2f3344]">
+                                    Story Composer
+                                </h2>
                             </div>
 
-                            {/* Sidebar / Settings */}
-                            <div className="space-y-6">
-                                {/* Publishing Settings */}
-                                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">
-                                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest border-l-4 border-orange-500 pl-3 mb-4">Publishing</h3>
-                                    
-                                    <div>
-                                        <label className="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1.5 px-1">Category</label>
-                                        <select 
-                                            value={data.category_id}
-                                            onChange={(e) => setData('category_id', e.target.value)}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-bold text-gray-900 focus:ring-0 focus:border-[#0a66c2] transition-colors"
-                                            required
-                                        >
-                                            <option value="">Select Category</option>
-                                            {categories.map((category) => (
-                                                <option key={category.id} value={category.id}>{category.name}</option>
-                                            ))}
-                                        </select>
-                                        {errors.category_id && <p className="text-xs text-red-500 mt-1 font-bold">{errors.category_id}</p>}
-                                    </div>
-
-                                    <button 
-                                        type="submit"
-                                        disabled={processing}
-                                        className="w-full bg-[#0a66c2] hover:bg-[#004182] text-white py-3 rounded-full font-black text-sm flex items-center justify-center space-x-2 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 active:scale-95"
-                                    >
-                                        <Save className="w-4 h-4" />
-                                        <span>{processing ? 'Publishing...' : 'Publish Blog'}</span>
-                                    </button>
+                            <div className="p-6 space-y-5">
+                                {/* Blog Title */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[12px] font-bold text-[#727586] uppercase tracking-wider ml-0.5 flex items-center gap-1.5">
+                                        Blog Title
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.title}
+                                        onChange={(e) =>
+                                            setData("title", e.target.value)
+                                        }
+                                        className={`w-full h-[45px] px-4 bg-[#f8f9fa] border ${errors.title ? "border-red-500" : "border-[#e3e4e8]"} rounded-[8px] text-[15px] text-[#2f3344] focus:outline-none focus:border-[#673ab7] focus:ring-1 focus:ring-[#673ab7] transition-all placeholder:text-slate-400 font-bold tracking-tight`}
+                                        placeholder="Enter a compelling title..."
+                                        required
+                                    />
+                                    {errors.title && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1 ml-1">
+                                            {errors.title}
+                                        </p>
+                                    )}
                                 </div>
 
-                                {/* Media Settings */}
-                                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">
-                                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest border-l-4 border-purple-500 pl-3 mb-4">Media (Optional)</h3>
-                                    
-                                    <div>
-                                        <label className="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1.5 px-1">Featured Image</label>
-                                        <div className="mt-2 text-center">
-                                            {data.image ? (
-                                                <div className="relative group">
-                                                    <img 
-                                                        src={URL.createObjectURL(data.image)} 
-                                                        alt="Preview" 
-                                                        className="w-full h-40 object-cover rounded-lg border border-gray-200"
-                                                    />
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => setData('image', null)}
-                                                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-md group-hover:scale-110 transition-transform"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                                    <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Upload Image</span>
-                                                    <input 
-                                                        type="file" 
-                                                        className="hidden" 
-                                                        onChange={(e) => setData('image', e.target.files[0])}
-                                                        accept="image/*"
-                                                    />
-                                                </label>
-                                            )}
-                                        </div>
-                                        {errors.image && <p className="text-xs text-red-500 mt-1 font-bold">{errors.image}</p>}
+                                {/* Blog Content */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[12px] font-bold text-[#727586] uppercase tracking-wider ml-0.5">
+                                        Content Body
+                                    </label>
+                                    <div className="prose-editor">
+                                        <ReactQuill
+                                            theme="snow"
+                                            value={data.content}
+                                            onChange={(content) =>
+                                                setData("content", content)
+                                            }
+                                            modules={{
+                                                toolbar: [
+                                                    [
+                                                        {
+                                                            header: [
+                                                                1,
+                                                                2,
+                                                                3,
+                                                                false,
+                                                            ],
+                                                        },
+                                                    ],
+                                                    [
+                                                        "bold",
+                                                        "italic",
+                                                        "underline",
+                                                        "strike",
+                                                        "blockquote",
+                                                    ],
+                                                    [
+                                                        { list: "ordered" },
+                                                        { list: "bullet" },
+                                                    ],
+                                                    ["link", "image", "video"],
+                                                    ["code-block"],
+                                                    ["clean"],
+                                                ],
+                                            }}
+                                            formats={[
+                                                "header",
+                                                "bold",
+                                                "italic",
+                                                "underline",
+                                                "strike",
+                                                "blockquote",
+                                                "list",
+                                                "bullet",
+                                                "link",
+                                                "image",
+                                                "video",
+                                                "code-block",
+                                            ]}
+                                            placeholder="Write something amazing..."
+                                            className="bg-white rounded-[8px] overflow-hidden border border-[#e3e4e8]"
+                                        />
                                     </div>
-
-                                    <div>
-                                        <label className="block text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1.5 px-1">Video URL (YouTube/Vimeo)</label>
-                                        <div className="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                                            <Video className="w-4 h-4 text-gray-400" />
-                                            <input 
-                                                type="url"
-                                                value={data.video_url}
-                                                onChange={(e) => setData('video_url', e.target.value)}
-                                                className="bg-transparent border-none p-0 text-sm font-bold text-gray-900 focus:ring-0 w-full"
-                                                placeholder="https://youtube.com/..."
-                                            />
-                                        </div>
-                                        {errors.video_url && <p className="text-xs text-red-500 mt-1 font-bold">{errors.video_url}</p>}
-                                    </div>
+                                    {errors.content && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1 ml-1">
+                                            {errors.content}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    {/* Right Column: Metadata & Settings */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Featured Media */}
+                        <div className="bg-white rounded-[12px] border border-[#e3e4e8] shadow-sm overflow-hidden animate-in fade-in slide-in-from-right duration-500">
+                            <div className="px-5 py-3 border-b border-[#e3e4e8] bg-slate-50/50 flex items-center gap-2">
+                                <ImageIcon
+                                    size={16}
+                                    className="text-[#673ab7]"
+                                />
+                                <h2 className="text-[14px] font-bold text-[#2f3344]">
+                                    Featured Media
+                                </h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                {/* Image Upload */}
+                                <div className="space-y-1.5">
+                                    <div
+                                        onClick={() =>
+                                            fileInputRef.current?.click()
+                                        }
+                                        className={`w-full aspect-video flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed ${errors.image ? "border-red-300" : "border-[#e3e4e8]"} rounded-xl cursor-pointer hover:border-[#673ab7] hover:bg-[#f4f0ff]/20 transition-all group p-4`}
+                                    >
+                                        <CloudUpload
+                                            size={24}
+                                            className="text-slate-300 group-hover:text-[#673ab7] transition-colors mb-2"
+                                        />
+                                        <span className="text-[12px] font-bold text-slate-500 group-hover:text-[#673ab7] text-center">
+                                            {data.image
+                                                ? data.image.name
+                                                : "Header Image (JPG/PNG)"}
+                                        </span>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            onChange={(e) =>
+                                                setData(
+                                                    "image",
+                                                    e.target.files[0],
+                                                )
+                                            }
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                    {errors.image && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1">
+                                            {errors.image}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Video URL */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold text-[#727586] uppercase tracking-wider ml-0.5 flex items-center gap-1.5">
+                                        <Video size={13} /> Video URL
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.video_url}
+                                        onChange={(e) =>
+                                            setData("video_url", e.target.value)
+                                        }
+                                        className="w-full h-[40px] px-4 bg-[#f8f9fa] border border-[#e3e4e8] rounded-[8px] text-[13px] text-[#2f3344] focus:outline-none focus:border-[#673ab7] transition-all placeholder:text-slate-400"
+                                        placeholder="Paste link here..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Classification */}
+                        <div className="bg-white rounded-[12px] border border-[#e3e4e8] shadow-sm overflow-hidden animate-in fade-in slide-in-from-right duration-500 delay-75">
+                            <div className="px-5 py-3 border-b border-[#e3e4e8] bg-slate-50/50 flex items-center gap-2">
+                                <LayoutGrid
+                                    size={16}
+                                    className="text-[#00b090]"
+                                />
+                                <h2 className="text-[14px] font-bold text-[#2f3344]">
+                                    Classification
+                                </h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold text-[#727586] uppercase tracking-wider ml-0.5">
+                                        Category
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={data.category_id}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "category_id",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full h-[45px] px-4 bg-white border border-[#e3e4e8] rounded-[8px] text-[14px] text-[#2f3344] focus:outline-none focus:border-[#673ab7] focus:ring-1 focus:ring-[#673ab7] appearance-none cursor-pointer transition-all"
+                                            required
+                                        >
+                                            <option value="">
+                                                Select Category
+                                            </option>
+                                            {categories.map((cat) => (
+                                                <option
+                                                    key={cat.id}
+                                                    value={cat.id}
+                                                >
+                                                    {cat.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {errors.category_id && (
+                                        <p className="text-red-500 text-[11px] font-medium mt-1">
+                                            {errors.category_id}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="bg-[#2f3344] p-6 rounded-[12px] shadow-sm text-white space-y-4">
+                            <div className="space-y-1">
+                                <h3 className="text-[15px] font-bold">
+                                    Publish Settings
+                                </h3>
+                                <p className="text-[11px] text-slate-400">
+                                    Finalize and publish your story to the
+                                    world.
+                                </p>
+                            </div>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={processing}
+                                className="w-full bg-[#2c8af8] text-white py-3 rounded-[8px] font-bold text-[14px] hover:bg-[#1a7ae8] transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                <Save size={18} />
+                                {processing
+                                    ? "Publishing..."
+                                    : "Publish Article"}
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

@@ -33,11 +33,18 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? array_merge($request->user()->toArray(), [
+                    'permissions' => [
+                        'categories.view', 'categories.create', 'categories.edit', 'categories.delete',
+                        'blogs.view', 'blogs.create', 'blogs.edit', 'blogs.delete',
+                        'users.view', 'users.delete'
+                    ]
+                ]) : null,
             ],
             'globalCategories' => Category::whereNull('parent_id')
                 ->with('children')
                 ->get(),
+            'settings' => \App\Models\GeneralSetting::first(),
         ];
     }
 }

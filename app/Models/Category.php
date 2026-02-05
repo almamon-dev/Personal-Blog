@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'parent_id'];
+    protected $fillable = ['name', 'slug', 'parent_id', 'is_active'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     /**
      * Get the parent category.

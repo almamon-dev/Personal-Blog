@@ -10,7 +10,7 @@ class Blog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'slug', 'content', 'image', 'video_url', 'category_id', 'user_id'];
+    protected $fillable = ['title', 'slug', 'content', 'image', 'video_url', 'category_id', 'user_id', 'likes_count'];
 
     public function getRouteKeyName()
     {
@@ -45,5 +45,10 @@ class Blog extends Model
     public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Comment::class)->latest();
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
     }
 }

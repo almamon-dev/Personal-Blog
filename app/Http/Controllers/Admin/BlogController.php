@@ -6,25 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $blogs = Blog::with(['category', 'user'])->latest()->get();
+        $query = Blog::with(['category', 'user'])->withCount('comments');
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%'.$request->search.'%')
+                    ->orWhere('content', 'like', '%'.$request->search.'%');
+            });
+        }
+
+        $blogs = $query->latest()
+            ->paginate($request->per_page ?? 10)
+            ->withQueryString();
+
         return Inertia::render('Admin/Blogs/Index', [
-            'blogs' => $blogs
+            'blogs' => $blogs,
+            'filters' => $request->only(['search', 'per_page']),
         ]);
     }
 
     public function create()
     {
         $categories = Category::all();
+
         return Inertia::render('Admin/Blogs/Create', [
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -41,12 +55,12 @@ class BlogController extends Controller
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('blogs', 'public');
-            $imagePath = '/storage/' . $imagePath;
+            $imagePath = '/'.$imagePath;
         }
 
         Blog::create([
             'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']) . '-' . Str::random(5),
+            'slug' => Str::slug($validated['title']).'-'.Str::random(5),
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
             'image' => $imagePath,
@@ -60,9 +74,10 @@ class BlogController extends Controller
     public function edit(Blog $blog)
     {
         $categories = Category::all();
+
         return Inertia::render('Admin/Blogs/Edit', [
             'blog' => $blog,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -82,7 +97,7 @@ class BlogController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $blog->image));
             }
             $imagePath = $request->file('image')->store('blogs', 'public');
-            $blog->image = '/storage/' . $imagePath;
+            $blog->image = '/'.$imagePath;
             $blog->save();
         }
 

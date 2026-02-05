@@ -17,9 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         // Create Admin User
         $user = User::factory()->create([
-            'name' => 'Savanihd Skills',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
+            'name' => 'AL Mamon',
+            'email' => 'mamon193p@gmail.com',
+            'password' => bcrypt('1410858998@aM'),
         ]);
 
         // Create Categories

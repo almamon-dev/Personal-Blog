@@ -16,8 +16,10 @@ class DashboardController extends Controller
                 'total_blogs' => Blog::count(),
                 'total_categories' => Category::count(),
                 'total_users' => User::count(),
-                'latest_blogs' => Blog::with('category')->latest()->limit(5)->get(),
-            ]
+                'total_likes' => Blog::sum('likes_count'),
+                'total_comments' => \App\Models\Comment::count(),
+                'latest_blogs' => Blog::with('category')->withCount('comments')->latest()->limit(5)->get(),
+            ],
         ]);
     }
 }

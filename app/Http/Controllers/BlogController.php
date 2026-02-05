@@ -13,9 +13,16 @@ class BlogController extends Controller
     {
         $categoryName = $request->query('category');
         $sort = $request->query('sort', 'recent');
-        
-        $query = Blog::with(['category', 'user']);
-        
+
+        $query = Blog::with(['category', 'user'])
+            ->withCount('comments');
+
+        if (auth()->check()) {
+            $query->withExists(['likes as is_liked' => function ($q) {
+                $q->where('user_id', auth()->id());
+            }]);
+        }
+
         if ($categoryName) {
             $category = Category::where('name', $categoryName)->first();
             if ($category) {
@@ -26,24 +33,24 @@ class BlogController extends Controller
         }
 
         if ($sort === 'top') {
-            $query->orderBy('id', 'desc');
+            $query->orderBy('likes_count', 'desc');
         } else {
             $query->latest();
         }
-        
+
         $blogs = $query->get();
 
         // Fetch "Other Tutorials" for the sidebar
         $otherTutorials = Blog::with('category')
-            ->when($categoryName, function($q) use ($categoryName) {
-                $q->whereHas('category', function($subQ) use ($categoryName) {
+            ->when($categoryName, function ($q) use ($categoryName) {
+                $q->whereHas('category', function ($subQ) use ($categoryName) {
                     $subQ->where('name', '!=', $categoryName);
                 });
             })
             ->latest()
             ->limit(3)
             ->get();
-        
+
         return Inertia::render('Blogs/Index', [
             'blogs' => $blogs,
             'currentCategory' => $categoryName,
@@ -55,6 +62,11 @@ class BlogController extends Controller
     public function show(Blog $blog)
     {
         $blog->load(['category', 'user', 'comments.user']);
+        $blog->loadCount(['comments', 'likes']);
+
+        if (auth()->check()) {
+            $blog->is_liked = $blog->likes()->where('user_id', auth()->id())->exists();
+        }
 
         $relatedBlogs = Blog::with('category')->where('category_id', $blog->category_id)
             ->where('id', '!=', $blog->id)
@@ -64,7 +76,23 @@ class BlogController extends Controller
 
         return Inertia::render('Blogs/Show', [
             'blog' => $blog,
-            'relatedBlogs' => $relatedBlogs
+            'relatedBlogs' => $relatedBlogs,
         ]);
+    }
+
+    public function toggleLike(Request $request, Blog $blog)
+    {
+        $user = auth()->user();
+        $like = $blog->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $blog->decrement('likes_count');
+        } else {
+            $blog->likes()->create(['user_id' => $user->id]);
+            $blog->increment('likes_count');
+        }
+
+        return back();
     }
 }
